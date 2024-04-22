@@ -23,80 +23,47 @@ format: <status code>: <number>
 status codes should be printed in ascending order
 
 """
-
-from sys import stdin
-from collections import Counter
-from time import sleep
-from signal import signal, SIGINT
+import sys
 
 
-def print_stats(stats):
-    print("File size: {}".format(stats['total_size']))
-    for k, v in sorted(stats['status_codes'].items()):
-        if v:
-            print("{}: {}".format(k, v))
-
-
-def parse_line(line):
-    """Parse a log line and return a tuple
-    containing the IP address, date, status code,
-    and file size"""
-    try:
-        ip_address, date, request, status_code, file_size = line.split()
-    except ValueError:
-        return None
-
-    try:
-        status_code = int(status_code)
-    except ValueError:
-        return None
-
-    try:
-        file_size = int(file_size)
-    except ValueError:
-        return None
-
-    return ip_address, date, status_code, file_size
-
-
-def main():
-    stats = {
-        'total_size': 0,
-        'status_codes': {
-            200: 0,
-            301: 0,
-            400: 0,
-            401: 0,
-            403: 0,
-            404: 0,
-            405: 0,
-            500: 0
-        }
-    }
-
-    signal(SIGINT, lambda s, f: print_stats(stats))
-
-    for line in stdin:
-        parsed_line = parse_line(line)
-
-        if not parsed_line:
-            continue
-        ip_address, date, status_code, file_size = parsed_line
-
-        stats['total_size'] += file_size
-        stats['status_codes'][status_code] += file_size
-        if stats['total_size'] % 10 == 0:
-            print_stats(stats)
-            sleep(1)
-
-            for k in stats['status_codes']:
-                stats['status_codes'][k] = 0
-
-                stats['total_size'] = 0
-
-                print_stats(stats)
-                sleep(1)
+def print_stats(file_size, status_codes):
+    """
+    Prints statistics at the beginning and every 10 lines.
+    Also called on Keyboard interruption.
+    """
+    print("File size:", file_size)
+    for code in sorted(status_codes):
+        if status_codes[code] > 0:
+            print(code + ":", status_codes[code])
 
 
 if __name__ == "__main__":
-    main()
+    line_num = 0
+    file_size = 0
+    status_codes = {"200": 0, "301": 0, "400": 0, "401": 0,
+                    "403": 0, "404": 0, "405": 0, "500": 0}
+
+    try:
+        for line in sys.stdin:
+            line_num += 1
+            split_line = line.split()
+
+            if len(split_line) > 1:
+                file_size += int(split_line[-1])
+
+            if len(split_line) > 2 and split_line[-2].isnumeric():
+                status_code = split_line[-2]
+            else:
+                status_code = "0"
+
+            if status_code in status_codes:
+                status_codes[status_code] += 1
+
+            if line_num % 10 == 0:
+                print_stats(file_size, status_codes)
+
+        print_stats(file_size, status_codes)
+
+    except KeyboardInterrupt:
+        print_stats(file_size, status_codes)
+        raise
