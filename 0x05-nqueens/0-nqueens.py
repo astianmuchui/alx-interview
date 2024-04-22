@@ -21,57 +21,57 @@ You don’t have to print the solutions in a specific order
 You are only allowed to import the sys module
 """
 
-from sys import argv, argc, stderr
 
-
-def print_board(board):
-    for i in range(n):
-        for j in range(n):
-            if board[i][j] == 1:
-                print("Q", end="")
-            else:
-                print(".", end="")
-        print()
+from sys import argv, exit
 
 
 def is_safe(board, row, col):
-    for i in range(col):
-        if board[row][i] == 1:
-            return False
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
-    for i, j in zip(range(row, n, 1), range(col, -1, -1)):
-        if board[i][j] == 1:
+    """Check if placing a queen at the given position is safe"""
+    for i in range(row):
+        if board[i] == col or abs(board[i] - col) == row - i:
             return False
     return True
 
 
-def solve(board, col):
-    if col == n:
-        print_board(board)
-        return True
-    res = False
-    for i in range(n):
-        if is_safe(board, i, col):
-            board[i][col] = 1
-            res = solve(board, col + 1) or res
-            board[i][col] = 0
-    return res
+def solve_nqueens(N):
+    """Find all possible solutions to the
+    N-Queens problem for a given board size N"""
+    solutions = []
+
+    def backtrack(row, board):
+        """Recursive function to place queens on the board"""
+        if row == N:
+
+            solutions.append(board[:])
+            return
+
+        for col in range(N):
+            if is_safe(board, row, col):
+                board[row] = col
+
+                backtrack(row + 1, board)
+
+    board = [-1] * N
+    backtrack(0, board)
+    return solutions
 
 
 if __name__ == "__main__":
-    if argc != 2:
-        print("Usage: nqueens N", file=stderr)
+    if len(argv) != 2:
+        print("Usage: nqueens N")
         exit(1)
-    if not argv[1].isdigit():
-        print("N must be a number", file=stderr)
+
+    try:
+        N = int(argv[1])
+    except ValueError:
+        print("N must be a number")
         exit(1)
-    if int(argv[1]) < 4:
-        print("N must be at least 4", file=stderr)
+
+    if N < 4:
+        print("N must be at least 4")
         exit(1)
-    n = int(argv[1])
-    board = [[0 for i in range(n)] for j in range(n)]
-    if not solve(board, 0):
-        print("No solution")
-        exit(0)
+
+    solutions = solve_nqueens(N)
+
+    for solution in solutions:
+        print(solution)
