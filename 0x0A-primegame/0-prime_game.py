@@ -6,6 +6,10 @@ Sieve of Eratosthenes
 
 
 def isWinner(x, nums):
+    """
+    Primagame function
+    That determines the winner of the game
+    """
     def sieve(n):
         """ Use Sieve of Eratosthenes
         to find all primes up to n """
