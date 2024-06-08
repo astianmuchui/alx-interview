@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 def isWinner(x, nums):
     def sieve(n):
         """ Use Sieve of Eratosthenes
