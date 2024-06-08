@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+"""
+Sieve of Eratosthenes
+"""
+
+
 def isWinner(x, nums):
     def sieve(n):
         """ Use Sieve of Eratosthenes
@@ -16,6 +21,10 @@ def isWinner(x, nums):
         return [p for p in range(n + 1) if is_prime[p]]
 
     def game_winner(n):
+        """
+        Determines the winner
+        """
+
         if n == 1:
             return "Ben"
 
